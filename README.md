@@ -35,7 +35,7 @@ No setup required. Just open the file in any browser.
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/pixelvault.git
+git clone https://github.com/siddhesh-wagh/ImageLink.git
 cd pixelvault
 
 # Open directly in browser
@@ -47,7 +47,7 @@ xdg-open index.html    # Linux
 ### Option B — 3-file project with Live Server
 
 ```bash
-git clone https://github.com/your-username/pixelvault.git
+git clone https://github.com/siddhesh-wagh/ImageLink.git
 cd pixelvault
 
 # Open in VS Code
