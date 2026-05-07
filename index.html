@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelVault — Smart Image Uploader</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo-mark">
+      <div class="logo-icon">🖼</div>
+      <span class="logo-name">PixelVault</span>
+    </div>
+    <h1>Smart Image Uploader</h1>
+    <p>// cloud upload · local fallback · multi-format sharing</p>
+  </header>
+
+  <!-- ── STATS BAR ── -->
+  <div class="stats-bar">
+    <div class="stat-cell">
+      <div class="s-val" id="stat-cloud">0</div>
+      <div class="s-lbl">☁ Cloud</div>
+    </div>
+    <div class="stat-cell">
+      <div class="s-val" id="stat-local">0</div>
+      <div class="s-lbl">💾 Local</div>
+    </div>
+    <div class="stat-cell">
+      <div class="s-val" id="stat-size">—</div>
+      <div class="s-lbl">Total Size</div>
+    </div>
+  </div>
+
+  <!-- ── MODE TABS ── -->
+  <div class="mode-tabs">
+    <button class="tab-btn active" id="tab-cloud">
+      ☁ Cloud Upload
+      <span class="tab-badge">ImgBB</span>
+    </button>
+    <button class="tab-btn" id="tab-local">
+      💾 Local Storage
+      <span class="tab-badge local">Offline</span>
+    </button>
+  </div>
+
+  <!-- ── LOCAL BANNER ── -->
+  <div class="local-banner" id="local-banner" style="display:none;">
+    <span class="banner-icon">🛡</span>
+    <div>
+      <strong>Local Mode Active</strong> — Images are stored directly in your browser's IndexedDB.
+      No internet required. Data stays on your device only.
+    </div>
+  </div>
+
+  <!-- ── UPLOAD CARD ── -->
+  <div class="card">
+
+    <!-- API Key Row (cloud only) -->
+    <div class="api-row">
+      <input
+        type="password"
+        id="api-key-input"
+        placeholder="Enter your ImgBB API key — get one free at imgbb.com"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <a href="https://api.imgbb.com/" target="_blank" style="flex-shrink:0;">
+        <button class="action-btn" type="button" style="height:100%;white-space:nowrap;">
+          Get Key ↗
+        </button>
+      </a>
+    </div>
+
+    <!-- Drop Zone -->
+    <div id="drop-zone">
+      <span class="drop-icon">📤</span>
+      <div class="drop-title">Drop image here or click to browse</div>
+      <div class="drop-sub">
+        Supports PNG, JPG, GIF, WEBP, SVG &nbsp;·&nbsp;
+        <span>Paste from clipboard (Ctrl+V)</span>
+      </div>
+      <input type="file" id="file-input" accept="image/*" hidden />
+    </div>
+
+    <!-- Options Row -->
+    <div class="options-row">
+      <div class="option-group">
+        <label>Custom Name</label>
+        <input type="text" id="name-input" placeholder="my-awesome-image" spellcheck="false" />
+      </div>
+      <div class="option-group">
+        <label>Expiry (Cloud)</label>
+        <select id="expire-select">
+          <option value="">Never expire</option>
+          <option value="600">10 minutes</option>
+          <option value="3600">1 hour</option>
+          <option value="86400">1 day</option>
+          <option value="604800">1 week</option>
+          <option value="2592000">1 month</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Upload Button -->
+    <button class="upload-btn" id="upload-btn" disabled>
+      <span>⬆</span> Upload Image
+    </button>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-text">Uploading...</span>
+        <span id="progress-pct"></span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- ── PREVIEW PANEL ── -->
+  <div class="preview-panel" id="preview-panel">
+    <div class="preview-img-wrap">
+      <img id="preview-img" src="" alt="preview" />
+      <span class="img-badge" id="preview-type">—</span>
+    </div>
+    <div class="preview-info">
+      <div class="info-stat">
+        <span class="stat-label">Filename</span>
+        <span class="stat-val" id="preview-name">—</span>
+      </div>
+      <div class="info-stat">
+        <span class="stat-label">File Size</span>
+        <span class="stat-val" id="preview-size">—</span>
+      </div>
+      <div class="info-stat">
+        <span class="stat-label">Dimensions</span>
+        <span class="stat-val" id="preview-dims">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULT CARD ── -->
+  <div class="result-card" id="result-card">
+    <div class="result-header">
+      <span class="result-status-dot" id="result-dot"></span>
+      <span class="result-title" id="result-title">Upload complete</span>
+      <span class="result-sub" id="result-sub"></span>
+    </div>
+
+    <div class="url-row">
+      <input class="url-input" id="url-input" type="text" readonly />
+    </div>
+
+    <div class="format-links" id="format-links"></div>
+
+    <div class="action-btns" style="margin-top:14px;">
+      <button class="action-btn primary" id="btn-copy-url">📋 Copy URL</button>
+      <button class="action-btn" id="btn-open">↗ Open</button>
+      <button class="action-btn" id="btn-download">⬇ Download</button>
+      <button class="action-btn danger" id="btn-reset">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- ── GALLERY SECTION ── -->
+  <div class="gallery-section">
+    <div class="section-header">
+      <div class="section-title">
+        🗂 My Uploads
+        <span class="count-badge" id="gallery-count">0</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="action-btn" id="btn-export" title="Export gallery as JSON">⬇ Export</button>
+        <button class="action-btn danger" id="btn-clear-all" title="Delete all uploads">🗑 Clear All</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <input class="search-input" id="search-input" type="text" placeholder="🔍  Search by name or URL..." />
+      <select class="filter-select" id="filter-select">
+        <option value="all">All types</option>
+        <option value="cloud">☁ Cloud only</option>
+        <option value="local">💾 Local only</option>
+      </select>
+    </div>
+
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-empty">📂 No uploads yet. Start uploading!</div>
+    </div>
+  </div>
+
+</div><!-- /app-wrapper -->
+
+<!-- ── TOAST CONTAINER ── -->
+<div id="toast-container"></div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>
+      <span>🖼</span>
+      <span id="modal-title">Image Details</span>
+    </h3>
+    <img class="modal-img-preview" id="modal-img" src="" alt="preview" />
+    <div class="modal-formats" id="modal-formats"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="modal-close" id="modal-download" style="background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;">
+        ⬇ Download
+      </button>
+      <button class="modal-close" id="modal-close">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
